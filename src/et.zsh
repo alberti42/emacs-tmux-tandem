@@ -27,13 +27,12 @@ function __emacs-tmux-openfile.et() {
   opt=${1-}
 
   if [[ $opt == "--list" ]]; then
-    tmux list-panes -F $'#{pane_index}\t#{pane_id}\t#{pane_current_command}\t#{pane_tty}'
+    command tmux list-panes -F $'#{pane_index}\t#{pane_id}\t#{pane_current_command}\t#{pane_tty}'
     return 0
   fi
 
   local cmdfile
-  cmdfile=$(tmux show-options -w -qv @emacs_openfile_cmdfile 2>/dev/null || true)
-  cmdfile=${cmdfile%$'\n'}
+  cmdfile=$(command tmux show-options -w -qv @emacs_openfile_cmdfile 2>/dev/null || true)
   if [[ $opt == "--cmdfile" ]]; then
     [[ -n $cmdfile ]] || return 1
     print -r -- "$cmdfile"
@@ -77,9 +76,8 @@ function __emacs-tmux-openfile.et() {
   # Move focus to the Emacs pane (unless --keep-focus was given).
   if [[ $keep_focus -eq 0 ]]; then
     local paneid
-    paneid=$(tmux show-options -w -qv @emacs_openfile_paneid 2>/dev/null || true)
-    paneid=${paneid%$'\n'}
-    [[ -n $paneid ]] && tmux select-pane -t "$paneid"
+    paneid=$(command tmux show-options -w -qv @emacs_openfile_paneid 2>/dev/null || true)
+    [[ -n $paneid ]] && command tmux select-pane -t "$paneid"
   fi
 }
 
