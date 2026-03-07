@@ -32,6 +32,7 @@ __emacs-tmux-openfile.et() {
 
   local cmdfile
   cmdfile=$(tmux show-options -w -qv @emacs_openfile_cmdfile 2>/dev/null || true)
+  cmdfile=${cmdfile%$'\n'}
 
   if [[ $opt == "--cmdfile" ]]; then
     [[ -n $cmdfile ]] || return 1
@@ -77,6 +78,7 @@ __emacs-tmux-openfile.et() {
   if [[ $keep_focus -eq 0 ]]; then
     local paneid
     paneid=$(tmux show-options -w -qv @emacs_openfile_paneid 2>/dev/null || true)
+    paneid=${paneid%$'\n'}
     [[ -n $paneid ]] && tmux select-pane -t "$paneid"
   fi
 }
