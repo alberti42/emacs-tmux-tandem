@@ -155,19 +155,13 @@ SPEC supports either:
   (interactive)
   (require 'server nil t)
   (require 'filenotify nil t)
-  (cond
-   ((boundp 'server-after-make-frame-hook)
-    (add-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
-   (t
-    (add-hook 'after-make-frame-functions #'tmux-openfile--register-frame))))
+  (add-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
 
 ;;;###autoload
 (defun tmux-openfile-disable ()
   "Disable tmux openfile registration hook." 
   (interactive)
-  (when (boundp 'server-after-make-frame-hook)
-    (remove-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
-  (remove-hook 'after-make-frame-functions #'tmux-openfile--register-frame))
+  (remove-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
 
 (provide 'tmux-openfile)
 
