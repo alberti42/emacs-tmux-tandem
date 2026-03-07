@@ -118,6 +118,22 @@ ln -s /path/to/emacs-tmux-openfile/src/et.bash ~/.local/bin/et
 
 ## Usage
 
+> [!NOTE]
+> The command is named `et` — short for **E**macs + **T**mux — following the
+> convention of short aliases for the Emacs client family. A typical setup looks
+> like this:
+>
+> ```zsh
+> alias e='emacsclient -nw'    # (e)  terminal frame, blocking
+> alias eg='emacsclient -n -c' # (eg) GUI frame, non-blocking
+> # et                         # (et) open a file in the Emacs frame registered
+> #                            #      in this tmux window, then focus it
+> ```
+>
+> `e` opens a terminal frame, `eg` opens a GUI frame, and `et` bridges the two
+> worlds by sending a file to whichever Emacs frame is already running inside
+> the current tmux window.
+
 ```
 et [-k] FILE
 et --cmdfile
