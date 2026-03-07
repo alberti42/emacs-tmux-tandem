@@ -4,10 +4,10 @@ Open files in a running Emacs session from anywhere inside tmux — a single
 shell command sends a file to Emacs and moves focus there instantly.
 
 ```zsh
-et.zsh src/main.c          # open file, focus jumps to Emacs
-et.zsh +42 src/main.c      # open at line 42
-et.zsh +42:7 src/main.c    # open at line 42, column 7
-et.zsh -k src/main.c       # open file, keep focus in the current pane
+et src/main.c          # open file, focus jumps to Emacs
+et +42 src/main.c      # open at line 42
+et +42:7 src/main.c    # open at line 42, column 7
+et -k src/main.c       # open file, keep focus in the current pane
 ```
 
 ## How it works
@@ -19,9 +19,9 @@ When Emacs starts inside a tmux window, it registers itself by:
    (`@emacs_openfile_cmdfile`) so that any shell in the same window can find it.
 3. Watching the IPC file with Emacs's built-in `filenotify`.
 
-When you run `et.zsh FILE`, the script reads the window variable, writes the
+When you run `et FILE`, the script reads the window variable, writes the
 file path into the IPC file, and Emacs opens it immediately. When the Emacs
-frame is closed the window variables are unset, so `et.zsh` reports a clear
+frame is closed the window variables are unset, so `et` reports a clear
 error if no session is registered.
 
 Works with both session types:
@@ -63,14 +63,57 @@ If you use `straight.el`:
     (tmux-openfile-enable)))
 ```
 
-### 2. Install the shell script
+### 2. Install the shell helper
 
-Copy `et.zsh` (or `et.bash`) to a directory on your `PATH` and make it
-executable:
+The shell side is supported for both **zsh** and **bash**. There are two
+installation options — choose whichever fits your setup.
+
+#### Option A — Plugin (recommended)
+
+The plugin defines a lazy-loading `et` function in your interactive shell.
+The real implementation is sourced on the first call and the stub replaces
+itself, so there is no measurable startup cost and no `PATH` changes are
+needed.
+
+**zsh** — source the plugin from `.zshrc`, or point any plugin manager at
+the repository root:
 
 ```zsh
-cp et.zsh ~/.local/bin/et
-chmod +x ~/.local/bin/et
+# .zshrc — manual
+source /path/to/emacs-tmux-openfile/emacs-tmux-openfile.plugin.zsh
+```
+
+```zsh
+# zinit
+zinit light your-github-user/emacs-tmux-openfile
+
+# oh-my-zsh (clone into custom plugins directory)
+# plugins=(... emacs-tmux-openfile)
+```
+
+**bash** — source the plugin from `.bashrc`:
+
+```bash
+# .bashrc
+source /path/to/emacs-tmux-openfile/emacs-tmux-openfile.plugin.bash
+```
+
+#### Option B — Script on PATH
+
+`src/et.zsh` and `src/et.bash` can each be executed directly as standalone
+scripts. Make the file executable and place a symlink somewhere on your
+`$PATH`:
+
+```zsh
+# zsh
+chmod +x /path/to/emacs-tmux-openfile/src/et.zsh
+ln -s /path/to/emacs-tmux-openfile/src/et.zsh ~/.local/bin/et
+```
+
+```bash
+# bash
+chmod +x /path/to/emacs-tmux-openfile/src/et.bash
+ln -s /path/to/emacs-tmux-openfile/src/et.bash ~/.local/bin/et
 ```
 
 ## Usage
