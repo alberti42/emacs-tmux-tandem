@@ -56,6 +56,16 @@ function __emacs-tmux-openfile.et() {
     return 1
   }
 
+  # Security guard: symlink and ownership checks
+  #
+  # -f $cmdfile — it exists and is a regular file
+  # ! -L $cmdfile — it is not a symlink (redundant with -f, but explicit)
+  # -O $cmdfile — it is owned by the current user
+  #
+  # If an attacker managed to replace the IPC file with a symlink
+  # pointing elsewhere, et would refuse to write to it.
+  # Without the check, writing $file to a symlink could redirect
+  # a write to an arbitrary path owned by the user.
   [[ -f $cmdfile && ! -L $cmdfile && -O $cmdfile ]] || {
     print -u2 "${cmd}: error: unsafe cmdfile: $cmdfile"
     return 1
