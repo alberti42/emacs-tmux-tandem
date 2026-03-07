@@ -1,11 +1,49 @@
 ;;; tmux-openfile.el --- Emacs <-> tmux open-file bridge -*- lexical-binding: t; -*-
 
-;; This module implements a simple "open file" bridge for tmux windows:
-;; - A tty emacsclient frame registers a per-window command file path into a tmux
-;;   window user option (default: @emacs_openfile_cmdfile).
-;; - Emacs watches that command file (in-place edits) and opens the file named
-;;   inside it.
-;; - An external helper (e.g. et.zsh) updates the command file.
+;; Overview
+;; --------
+;; Lets shell tools ask a running Emacs server to open a file by writing a
+;; file-spec into a small per-window IPC file that Emacs watches with filenotify.
+;; Requires Emacs 29+ (server-after-make-frame-hook).
+;;
+;; Frame registration flow (emacsclient -t)
+;; -----------------------------------------
+;;
+;;   emacsclient -t   →  server creates a TTY frame
+;;                    →  server-after-make-frame-hook fires with that frame
+;;                    →  tmux-openfile--register-frame runs
+;;                    →  tmux-openfile--frame-tty: is it a TTY? (display-graphic-p check)
+;;                           GUI → returns nil → stops here, nothing happens
+;;                           TTY → returns the /dev/pts/N path
+;;                    →  tmux-openfile--window-id-for-tty: runs `tmux list-panes -a'
+;;                           to find which window owns that /dev/pts/N
+;;                           not in tmux → returns nil → stops here
+;;                           in tmux → returns window_id (e.g. @3)
+;;                    →  tmux-openfile--ensure-cmdfile: creates the IPC file
+;;                           at $XDG_CACHE_HOME/emacs/tmux-openfile/openfile-@3.cmd
+;;                    →  tmux set-option -w -t @3 @emacs_openfile_cmdfile <path>
+;;                    →  tmux-openfile--install-watch: installs filenotify watch on that file
+;;
+;; Open-file flow (et.zsh → Emacs)
+;; --------------------------------
+;;
+;;   et.zsh FILE      →  reads @emacs_openfile_cmdfile from the current tmux window
+;;                    →  writes FILE into the IPC file in-place (no atomic rename,
+;;                           so the inode stays stable and the watch keeps working)
+;;                    →  filenotify callback fires in Emacs
+;;                    →  reads the IPC file and calls tmux-openfile--open-spec
+;;                    →  find-file opens the file in the registered frame
+;;
+;; File-spec format
+;; ----------------
+;;   /path/to/file
+;;   +LINE[:COLUMN] /path/to/file
+;;
+;; Usage
+;; -----
+;; Call `tmux-openfile-enable' once (e.g. from init.el).  Registration is then
+;; automatic for every subsequent tty emacsclient frame.
+;; Call `tmux-openfile-disable' to stop registering new frames.
 
 (require 'cl-lib)
 
