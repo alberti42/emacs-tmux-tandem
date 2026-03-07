@@ -3,7 +3,7 @@ name: Draft Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # full history needed for git log between tags
+          fetch-depth: 0 # full history needed for git log between tags
 
       - name: Build release assets and create draft
         env:
@@ -39,13 +39,15 @@ jobs:
           } > release_body.md
 
           # --- Assets ---
-          # Emacs module (can be referenced directly from straight / use-package)
-          cp tmux-openfile.el "tmux-openfile-${TAG}.el"
+          # Emacs module — zip with tmux-openfile.el at the root.
+          # straight.el's default :files spec ("*.el") matches it without
+          # extra configuration when the zip is used as a :local-repo source.
+          zip "emacs-tmux-openfile-${TAG}.zip" tmux-openfile.el
 
-          # zsh plugin (plugin bootstrap + implementation)
+          # zsh plugin (bootstrap + implementation)
           zip "et-zsh-${TAG}.zip" emacs-tmux-openfile.plugin.zsh src/et.zsh
 
-          # bash plugin (plugin bootstrap + implementation)
+          # bash plugin (bootstrap + implementation)
           zip "et-bash-${TAG}.zip" emacs-tmux-openfile.plugin.bash src/et.bash
 
           # --- Draft release ---
@@ -53,6 +55,6 @@ jobs:
             --draft \
             --title "${TAG}" \
             --notes-file release_body.md \
-            "tmux-openfile-${TAG}.el#Emacs module (tmux-openfile.el)" \
+            "emacs-tmux-openfile-${TAG}.zip#Emacs module (tmux-openfile.el)" \
             "et-zsh-${TAG}.zip#zsh plugin" \
             "et-bash-${TAG}.zip#bash plugin"
