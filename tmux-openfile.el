@@ -26,6 +26,18 @@
 ;;                    →  tmux set-option -w -t @3 @emacs_openfile_paneid %5
 ;;                    →  tmux-openfile--install-watch: installs filenotify watch on that file
 ;;
+;; Frame deregistration flow (emacsclient exits)
+;; -----------------------------------------------
+;;
+;;   frame deleted    →  delete-frame-functions fires with that frame
+;;                    →  tmux-openfile--deregister-frame runs
+;;                    →  reverse-lookup finds the window-id for the frame
+;;                    →  tmux set-option -w -t @3 -u @emacs_openfile_cmdfile
+;;                    →  tmux set-option -w -t @3 -u @emacs_openfile_paneid
+;;                    →  file-notify-rm-watch removes the IPC file watch
+;;                    →  frame and watch entries removed from internal tables
+;;                    →  et.zsh will now report no Emacs client in this window
+;;
 ;; Open-file flow (et.zsh → Emacs)
 ;; --------------------------------
 ;;
@@ -161,6 +173,12 @@ SPEC supports either:
       (ignore-errors (insert-file-contents path))
       (buffer-string))))
 
+(defun tmux-openfile--win-for-frame (frame)
+  "Return the tmux window-id registered for FRAME, or nil."
+  (cl-loop for win being the hash-keys of tmux-openfile--win->frame
+           when (eq (gethash win tmux-openfile--win->frame) frame)
+           return win))
+
 (defun tmux-openfile--install-watch (window-id cmdfile)
   (when (and (file-exists-p cmdfile)
              (not (gethash window-id tmux-openfile--win->watch)))
@@ -176,6 +194,18 @@ SPEC supports either:
             (with-selected-frame frame
               (ignore-errors (tmux-openfile--open-spec spec)))))))
      tmux-openfile--win->watch)))
+
+(defun tmux-openfile--deregister-frame (frame)
+  "Unset tmux window variables and remove the file watch for FRAME.
+Called from `delete-frame-functions' when an emacsclient frame is closed."
+  (let ((win (tmux-openfile--win-for-frame frame)))
+    (when win
+      (tmux-openfile--tmux "set-option" "-w" "-t" win "-u" tmux-openfile-tmux-option)
+      (tmux-openfile--tmux "set-option" "-w" "-t" win "-u" tmux-openfile-pane-option)
+      (when-let ((watch (gethash win tmux-openfile--win->watch)))
+        (file-notify-rm-watch watch))
+      (remhash win tmux-openfile--win->watch)
+      (remhash win tmux-openfile--win->frame))))
 
 (defun tmux-openfile--register-frame ()
   "Register the current frame's tmux window with a command file and file watch.
@@ -198,13 +228,15 @@ Called from `server-after-make-frame-hook', where the new frame is selected."
   (interactive)
   (require 'server nil t)
   (require 'filenotify nil t)
-  (add-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
+  (add-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame)
+  (add-hook 'delete-frame-functions #'tmux-openfile--deregister-frame))
 
 ;;;###autoload
 (defun tmux-openfile-disable ()
   "Disable tmux openfile registration hook." 
   (interactive)
-  (remove-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame))
+  (remove-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame)
+  (remove-hook 'delete-frame-functions #'tmux-openfile--deregister-frame))
 
 (provide 'tmux-openfile)
 
