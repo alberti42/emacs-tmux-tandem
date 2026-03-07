@@ -28,12 +28,6 @@
 (defvar tmux-openfile--win->watch (make-hash-table :test 'equal))
 (defvar tmux-openfile--win->frame (make-hash-table :test 'equal))
 
-(defun tmux-openfile--string-trim (s)
-  (if (fboundp 'string-trim)
-      (string-trim s)
-    (replace-regexp-in-string
-     "\\`[\t\n\r ]+\\|[\t\n\r ]+\\'" "" (or s ""))))
-
 (defun tmux-openfile--string-empty-p (s)
   (or (null s) (= (length s) 0)))
 
@@ -60,11 +54,14 @@
       (ignore-errors (set-file-modes path #o600)))
     path))
 
+(defvar tmux-openfile--executable (executable-find "tmux")
+  "Cached path to the tmux executable, or nil if not found.")
+
 (defun tmux-openfile--tmux (&rest args)
   "Run tmux ARGS. Return stdout string on success, nil otherwise."
-  (when (executable-find "tmux")
+  (when tmux-openfile--executable
     (with-temp-buffer
-      (let ((rc (apply #'call-process "tmux" nil t nil args)))
+      (let ((rc (apply #'call-process tmux-openfile--executable nil t nil args)))
         (when (and (numberp rc) (zerop rc))
           (buffer-string))))))
 
@@ -94,7 +91,7 @@ SPEC supports either:
 - /path/to/file
 - +LINE[:COLUMN] /path/to/file
 "
-  (let* ((s (tmux-openfile--string-trim spec))
+  (let* ((s (string-trim spec))
          (re "\\`\\+\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?[[:space:]]+\\(.+\\)\\'"))
     (cond
      ((tmux-openfile--string-empty-p s)
@@ -120,11 +117,7 @@ SPEC supports either:
       (buffer-string))))
 
 (defun tmux-openfile--install-watch (window-id cmdfile)
-  (when (and (featurep 'filenotify)
-             (fboundp 'file-notify-add-watch)
-             (stringp window-id)
-             (stringp cmdfile)
-             (file-exists-p cmdfile)
+  (when (and (file-exists-p cmdfile)
              (not (gethash window-id tmux-openfile--win->watch)))
     (puthash
      window-id
