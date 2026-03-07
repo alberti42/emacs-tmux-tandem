@@ -7,8 +7,10 @@
 # directly as a script.
 
 function __emacs-tmux-openfile.et() {
-  emulate -LR zsh
-  setopt errexit nounset pipefail
+  builtin emulate -LR zsh -o warn_create_global -o pipe_fail -o no_unset
+  # Note: errexit (ERR_EXIT) is intentionally omitted. In zsh, ERR_EXIT exits
+  # the shell process itself — not just the function — when a command fails,
+  # even with LOCAL_OPTIONS set. Errors are handled explicitly instead.
 
   local cmd=$1; shift
 
