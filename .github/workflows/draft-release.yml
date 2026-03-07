@@ -45,8 +45,8 @@ jobs:
           # zsh plugin (plugin bootstrap + implementation)
           zip "et-zsh-${TAG}.zip" emacs-tmux-openfile.plugin.zsh src/et.zsh
 
-          # bash plugin
-          zip "et-bash-${TAG}.zip" et.bash
+          # bash plugin (plugin bootstrap + implementation)
+          zip "et-bash-${TAG}.zip" emacs-tmux-openfile.plugin.bash src/et.bash
 
           # --- Draft release ---
           gh release create "${TAG}" \
