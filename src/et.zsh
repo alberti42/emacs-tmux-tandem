@@ -8,11 +8,16 @@
 
 function __emacs-tmux-openfile._usage() {
   local cmd=$1 fd=$2
+  print -u $fd -r -- "${cmd} — open a file in a running Emacs session from within the current tmux window"
+  print -u $fd -r -- ""
   print -u $fd -r -- "usage: ${cmd} [-k] FILE"
   print -u $fd -r -- "       ${cmd} --cmdfile"
   print -u $fd -r -- "       ${cmd} --list"
+  print -u $fd -r -- ""
   print -u $fd -r -- "options:"
   print -u $fd -r -- "  -k, --keep-focus  do not move focus to the Emacs pane after opening"
+  print -u $fd -r -- "      --cmdfile     print the IPC file path for this tmux window and exit"
+  print -u $fd -r -- "      --list        list all tmux panes with index, id, command, and tty"
   print -u $fd -r -- "  -h, --help        show this help message"
 }
 
