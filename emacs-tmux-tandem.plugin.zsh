@@ -10,9 +10,9 @@ function __emacs-tmux-tandem.et() {
 }
 
 # Public wrapper under the user-configured name (default: et).
-# ETO_CMD_NAME is read at source time and baked into the wrapper body,
+# ET_TANDEM_CMD_NAME is read at source time and baked into the wrapper body,
 # so the name is resolved once and never read again at call time.
 (){
-  local _cmd="${ETO_CMD_NAME:-et}"
+  local _cmd="${ET_TANDEM_CMD_NAME:-et}"
   functions[$_cmd]="__emacs-tmux-tandem.et ${_cmd} \"\$@\""
 }
