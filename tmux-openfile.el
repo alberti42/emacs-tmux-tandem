@@ -298,10 +298,10 @@ if this pane is already registered."
                (not (gethash pane tmux-openfile--pane->frame)))
       (let* ((cmdfile (tmux-openfile--make-cmdfile win pane))
              (stack (tmux-openfile--stack-read win)))
-        (tmux-openfile--stack-write win (append stack (list cmdfile)))
         (tmux-openfile--install-watch pane cmdfile)
         (puthash pane frame tmux-openfile--pane->frame)
-        (puthash pane (cons win cmdfile) tmux-openfile--pane->session)))))
+        (puthash pane (cons win cmdfile) tmux-openfile--pane->session)
+        (tmux-openfile--stack-write win (append stack (list cmdfile)))))))
 
 ;;;###autoload
 (defun tmux-openfile-enable ()
