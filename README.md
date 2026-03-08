@@ -105,6 +105,30 @@ zinit light your-github-user/emacs-tmux-tandem
 source /path/to/emacs-tmux-tandem/emacs-tmux-tandem.plugin.bash
 ```
 
+<details>
+<summary>Renaming the command</summary>
+
+By default the public command is named `et`. Set `ET_TANDEM_CMD_NAME` before
+sourcing the plugin to use a different name:
+
+```zsh
+# zsh (.zshrc)
+ET_TANDEM_CMD_NAME=emt
+source /path/to/emacs-tmux-tandem/emacs-tmux-tandem.plugin.zsh
+```
+
+```bash
+# bash (.bashrc)
+ET_TANDEM_CMD_NAME=emt
+source /path/to/emacs-tmux-tandem/emacs-tmux-tandem.plugin.bash
+```
+
+The name is resolved once at source time and baked into the wrapper. It is
+never read again at call time, so changing the variable after sourcing has no
+effect.
+
+</details>
+
 #### Option B — Script on PATH
 
 `src/et.zsh` and `src/et.bash` can each be executed directly as standalone
