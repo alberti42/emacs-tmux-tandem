@@ -1,4 +1,4 @@
-# emacs-tmux-openfile
+# emacs-tmux-tandem
 
 Open files in a running Emacs session from anywhere inside tmux — a single
 shell command sends a file to Emacs and moves focus there instantly.
@@ -43,8 +43,8 @@ Works with both session types:
 
 #### Option A — Manual
 
-Download `emacs-tmux-openfile-<tag>.zip` from the
-[latest release](https://github.com/alberti42/emacs-tmux-openfile/releases/latest),
+Download `emacs-tmux-tandem-<tag>.zip` from the
+[latest release](https://github.com/alberti42/emacs-tmux-tandem/releases/latest),
 extract `tmux-openfile.el`, and place it somewhere on your `load-path`. Then
 add to your `init.el`:
 
@@ -62,7 +62,7 @@ add to your `init.el`:
     :straight (tmux-openfile
                :type git
                :host github
-               :repo "alberti42/emacs-tmux-openfile")
+               :repo "alberti42/emacs-tmux-tandem")
     :config
     (tmux-openfile-enable)))
 ```
@@ -87,22 +87,22 @@ the repository root:
 
 ```zsh
 # .zshrc — manual
-source /path/to/emacs-tmux-openfile/emacs-tmux-openfile.plugin.zsh
+source /path/to/emacs-tmux-tandem/emacs-tmux-tandem.plugin.zsh
 ```
 
 ```zsh
 # zinit
-zinit light your-github-user/emacs-tmux-openfile
+zinit light your-github-user/emacs-tmux-tandem
 
 # oh-my-zsh (clone into custom plugins directory)
-# plugins=(... emacs-tmux-openfile)
+# plugins=(... emacs-tmux-tandem)
 ```
 
 **bash** — source the plugin from `.bashrc`:
 
 ```bash
 # .bashrc
-source /path/to/emacs-tmux-openfile/emacs-tmux-openfile.plugin.bash
+source /path/to/emacs-tmux-tandem/emacs-tmux-tandem.plugin.bash
 ```
 
 #### Option B — Script on PATH
@@ -113,14 +113,14 @@ scripts. Make the file executable and place a symlink somewhere on your
 
 ```zsh
 # zsh
-chmod +x /path/to/emacs-tmux-openfile/src/et.zsh
-ln -s /path/to/emacs-tmux-openfile/src/et.zsh ~/.local/bin/et
+chmod +x /path/to/emacs-tmux-tandem/src/et.zsh
+ln -s /path/to/emacs-tmux-tandem/src/et.zsh ~/.local/bin/et
 ```
 
 ```bash
 # bash
-chmod +x /path/to/emacs-tmux-openfile/src/et.bash
-ln -s /path/to/emacs-tmux-openfile/src/et.bash ~/.local/bin/et
+chmod +x /path/to/emacs-tmux-tandem/src/et.bash
+ln -s /path/to/emacs-tmux-tandem/src/et.bash ~/.local/bin/et
 ```
 
 ## Usage

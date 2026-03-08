@@ -1,12 +1,12 @@
 #!/usr/bin/env zsh
 
-# emacs-tmux-openfile — open a file in a running Emacs from within tmux.
+# emacs-tmux-tandem — open a file in a running Emacs from within tmux.
 #
-# Defines __emacs-tmux-openfile.et, the real implementation of the et command.
-# Sourced by emacs-tmux-openfile.plugin.zsh on first call; also executable
+# Defines __emacs-tmux-tandem.et, the real implementation of the et command.
+# Sourced by emacs-tmux-tandem.plugin.zsh on first call; also executable
 # directly as a script.
 
-function __emacs-tmux-openfile._usage() {
+function __emacs-tmux-tandem._usage() {
   local cmd=$1 fd=$2
   print -u $fd -r -- "${cmd} — open a file in a running Emacs session from within the current tmux window"
   print -u $fd -r -- ""
@@ -22,7 +22,7 @@ function __emacs-tmux-openfile._usage() {
   print -u $fd -r -- "  -h, --help        show this help message"
 }
 
-function __emacs-tmux-openfile.et() {
+function __emacs-tmux-tandem.et() {
   builtin emulate -LR zsh -o warn_create_global -o pipe_fail -o no_unset
   # Note: errexit (ERR_EXIT) is intentionally omitted. In zsh, ERR_EXIT exits
   # the shell process itself — not just the function — when a command fails,
@@ -43,7 +43,7 @@ function __emacs-tmux-openfile.et() {
   opt=${1-}
 
   if [[ $opt == "-h" || $opt == "--help" ]]; then
-    __emacs-tmux-openfile._usage "$cmd" 1
+    __emacs-tmux-tandem._usage "$cmd" 1
     return 0
   fi
 
@@ -65,7 +65,7 @@ function __emacs-tmux-openfile.et() {
 
   local file=${1-}
   if [[ -z $file && $keep_focus -eq 1 ]]; then
-    __emacs-tmux-openfile._usage "$cmd" 2
+    __emacs-tmux-tandem._usage "$cmd" 2
     return 2
   fi
 
@@ -131,4 +131,4 @@ function __emacs-tmux-openfile.et() {
 }
 
 # Allow direct execution as a script (not sourced as a plugin).
-[[ "$ZSH_EVAL_CONTEXT" == *:file* ]] || __emacs-tmux-openfile.et "${0:t}" "$@"
+[[ "$ZSH_EVAL_CONTEXT" == *:file* ]] || __emacs-tmux-tandem.et "${0:t}" "$@"

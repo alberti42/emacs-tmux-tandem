@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-# emacs-tmux-openfile — open a file in a running Emacs from within tmux.
+# emacs-tmux-tandem — open a file in a running Emacs from within tmux.
 #
-# Defines __emacs-tmux-openfile.et, the real implementation of the et command.
-# Sourced by emacs-tmux-openfile.plugin.bash on first call; also executable
+# Defines __emacs-tmux-tandem.et, the real implementation of the et command.
+# Sourced by emacs-tmux-tandem.plugin.bash on first call; also executable
 # directly as a script.
 #
 # Note: set -euo pipefail is intentionally omitted from the function body.
 # In bash, unlike zsh, shell options set inside a function affect the whole
 # session. Errors are handled explicitly instead.
 
-__emacs-tmux-openfile._usage() {
+__emacs-tmux-tandem._usage() {
   local cmd=$1 fd=$2
   printf '%s\n' "${cmd} — open a file in a running Emacs session from within the current tmux window" >&$fd
   printf '%s\n' "" >&$fd
@@ -26,7 +26,7 @@ __emacs-tmux-openfile._usage() {
   printf '%s\n' "  -h, --help        show this help message" >&$fd
 }
 
-__emacs-tmux-openfile.et() {
+__emacs-tmux-tandem.et() {
   local cmd=$1; shift
 
   [[ -n ${TMUX-} ]] || { printf '%s\n' "${cmd}: error: not inside tmux" >&2; return 1; }
@@ -42,7 +42,7 @@ __emacs-tmux-openfile.et() {
   opt=${1-}
 
   if [[ $opt == "-h" || $opt == "--help" ]]; then
-    __emacs-tmux-openfile._usage "$cmd" 1
+    __emacs-tmux-tandem._usage "$cmd" 1
     return 0
   fi
 
@@ -65,7 +65,7 @@ __emacs-tmux-openfile.et() {
 
   local file=${1-}
   if [[ -z $file && $keep_focus -eq 1 ]]; then
-    __emacs-tmux-openfile._usage "$cmd" 2
+    __emacs-tmux-tandem._usage "$cmd" 2
     return 2
   fi
 
@@ -146,4 +146,4 @@ __emacs-tmux-openfile.et() {
 }
 
 # Allow direct execution as a script (not sourced as a plugin).
-[[ "${BASH_SOURCE[0]}" != "$0" ]] || __emacs-tmux-openfile.et "${0##*/}" "$@"
+[[ "${BASH_SOURCE[0]}" != "$0" ]] || __emacs-tmux-tandem.et "${0##*/}" "$@"

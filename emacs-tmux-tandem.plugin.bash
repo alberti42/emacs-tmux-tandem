@@ -1,12 +1,12 @@
 #!/hint/bash
 
 # Private bootstrap stub — sources the real implementation on first call,
-# which redefines __emacs-tmux-openfile.et, then forwards the call.
-__emacs-tmux-openfile.et() {
+# which redefines __emacs-tmux-tandem.et, then forwards the call.
+__emacs-tmux-tandem.et() {
   local plugin_dir
   plugin_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   source "${plugin_dir}/src/et.bash"
-  __emacs-tmux-openfile.et "$@"
+  __emacs-tmux-tandem.et "$@"
 }
 
 # Public wrapper under the user-configured name (default: et).
@@ -15,7 +15,7 @@ __emacs-tmux-openfile.et() {
 _eto_cmd="${ETO_CMD_NAME:-et}"
 eval "
 ${_eto_cmd}() {
-  __emacs-tmux-openfile.et \"${_eto_cmd}\" \"\$@\"
+  __emacs-tmux-tandem.et \"${_eto_cmd}\" \"\$@\"
   local rc=\$?
   return \$rc
 }

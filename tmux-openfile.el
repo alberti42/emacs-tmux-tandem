@@ -1,7 +1,7 @@
 ;;; tmux-openfile.el --- Emacs <-> tmux openfile bridge -*- lexical-binding: t; -*-
 
 ;; Author: Andrea Alberti <a.alberti82@gmail.com>
-;; URL: https://github.com/alberti42/emacs-tmux-openfile
+;; URL: https://github.com/alberti42/emacs-tmux-tandem
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: tools, terminals
