@@ -39,10 +39,10 @@ jobs:
           } > release_body.md
 
           # --- Assets ---
-          # Emacs module — zip with tmux-openfile.el at the root.
+          # Emacs module — zip with tmux-tandem.el at the root.
           # straight.el's default :files spec ("*.el") matches it without
           # extra configuration when the zip is used as a :local-repo source.
-          zip "emacs-tmux-tandem-${TAG}.zip" tmux-openfile.el
+          zip "emacs-tmux-tandem-${TAG}.zip" tmux-tandem.el
 
           # zsh plugin (bootstrap + implementation)
           zip "et-zsh-${TAG}.zip" emacs-tmux-tandem.plugin.zsh src/et.zsh
@@ -55,6 +55,6 @@ jobs:
             --draft \
             --title "${TAG}" \
             --notes-file release_body.md \
-            "emacs-tmux-tandem-${TAG}.zip#Emacs module (tmux-openfile.el)" \
+            "emacs-tmux-tandem-${TAG}.zip#Emacs module (tmux-tandem.el)" \
             "et-zsh-${TAG}.zip#zsh plugin" \
             "et-bash-${TAG}.zip#bash plugin"

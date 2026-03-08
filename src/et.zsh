@@ -96,7 +96,7 @@ function __emacs-tmux-tandem.et() {
 
   [[ -n $cmdfile ]] || {
     print -u2 "${cmd}: error: no Emacs session registered in this tmux window"
-    print -u2 "${cmd}: hint: load tmux-openfile.el and run M-x tmux-openfile-enable"
+    print -u2 "${cmd}: hint: load tmux-tandem.el and run M-x tmux-tandem-enable"
     return 1
   }
 

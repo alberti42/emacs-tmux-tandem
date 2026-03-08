@@ -15,7 +15,7 @@ et -k src/main.c       # open file, keep focus in the current pane
 
 When Emacs starts inside a tmux window, it registers itself by:
 
-1. Creating a small IPC file under `$XDG_CACHE_HOME/emacs/tmux-openfile/`.
+1. Creating a small IPC file under `$XDG_CACHE_HOME/emacs/tmux-tandem/`.
 2. Storing the path to that file in a tmux window variable
    (`@emacs_openfile_stack`) so that any shell in the same window can find it.
 3. Watching the IPC file with Emacs's built-in `filenotify`.
@@ -45,26 +45,26 @@ Works with both session types:
 
 Download `emacs-tmux-tandem-<tag>.zip` from the
 [latest release](https://github.com/alberti42/emacs-tmux-tandem/releases/latest),
-extract `tmux-openfile.el`, and place it somewhere on your `load-path`. Then
+extract `tmux-tandem.el`, and place it somewhere on your `load-path`. Then
 add to your `init.el`:
 
 ```elisp
 (when (>= emacs-major-version 29)
-  (require 'tmux-openfile)
-  (tmux-openfile-enable))
+  (require 'tmux-tandem)
+  (tmux-tandem-enable))
 ```
 
 #### Option B — straight.el
 
 ```elisp
 (when (>= emacs-major-version 29)
-  (use-package tmux-openfile
-    :straight (tmux-openfile
+  (use-package tmux-tandem
+    :straight (tmux-tandem
                :type git
                :host github
                :repo "alberti42/emacs-tmux-tandem")
     :config
-    (tmux-openfile-enable)))
+    (tmux-tandem-enable)))
 ```
 
 This clones the repository directly and tracks the main branch. To pin to a
@@ -176,19 +176,19 @@ et --cmdfile                         # should print the active IPC file path
 If the variable is empty, confirm that `tmux` was found by Emacs at startup:
 
 ```
-M-: tmux-openfile--executable
+M-: tmux-tandem--executable
 ```
 
 ## Configuration
 
-All options belong to the `tmux-openfile` customize group (`M-x customize-group
-tmux-openfile`).
+All options belong to the `tmux-tandem` customize group (`M-x customize-group
+tmux-tandem`).
 
-| Variable                      | Default                  | Description                                               |
-| ----------------------------- | ------------------------ | --------------------------------------------------------- |
-| `tmux-openfile-stack-option`  | `@emacs_openfile_stack`  | tmux window option that stores the ordered session list   |
-| `tmux-openfile-cache-subdir`  | `tmux-openfile`          | Subdirectory under `$XDG_CACHE_HOME/emacs/` for IPC files |
-| `tmux-openfile-watch-events`  | `(change)`               | filenotify events that trigger file opening               |
+| Variable                    | Default                  | Description                                               |
+| --------------------------- | ------------------------ | --------------------------------------------------------- |
+| `tmux-tandem-stack-option`  | `@emacs_openfile_stack`  | tmux window option that stores the ordered session list   |
+| `tmux-tandem-cache-subdir`  | `tmux-tandem`            | Subdirectory under `$XDG_CACHE_HOME/emacs/` for IPC files |
+| `tmux-tandem-watch-events`  | `(change)`               | filenotify events that trigger file opening               |
 
 ## License
 

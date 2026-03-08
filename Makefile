@@ -9,9 +9,9 @@ version-bump:
 		&& { echo "error: tag $(TAG) already exists"; exit 1; } || true
 	@git diff --quiet && git diff --cached --quiet \
 		|| { echo "error: working tree is not clean"; exit 1; }
-	@sed -i '' "s/^;; Version:.*$$/;; Version: $$(echo $(TAG) | sed 's/^v//')/" tmux-openfile.el
+	@sed -i '' "s/^;; Version:.*$$/;; Version: $$(echo $(TAG) | sed 's/^v//')/" tmux-tandem.el
 	@touch "release-notes/release-$(TAG).md"
-	@git add tmux-openfile.el "release-notes/release-$(TAG).md"
+	@git add tmux-tandem.el "release-notes/release-$(TAG).md"
 	@git commit -m "chore(release): bump to $(TAG)"
 	@git tag "$(TAG)"
 	@echo "Bumped to $(TAG). Fill in release-notes/release-$(TAG).md, then run: make push-release-draft TAG=$(TAG)"
