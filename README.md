@@ -1,7 +1,10 @@
 # emacs-tmux-tandem
 
-Open files in a running Emacs session from anywhere inside tmux — a single
-shell command sends a file to Emacs and moves focus there instantly.
+Keep Emacs running in one pane of a tmux window alongside your other tools —
+a shell, [yazi](https://github.com/sxyazi/yazi), [lazygit](https://github.com/jesseduffield/lazygit), or anything else. Run `et FILE` from any
+pane in that window and the file opens instantly in the Emacs session next to
+you. Each tmux window manages its own Emacs session independently, so multiple
+windows never interfere with each other.
 
 ```zsh
 et                     # focus jumps to Emacs (no file opened)
