@@ -322,12 +322,14 @@ registered and every closed frame is automatically deregistered."
 ;;;###autoload
 (defun tmux-openfile-disable ()
   "Disable the tmux open-file bridge.
-Removes the registration and deregistration hooks; frames already registered
-remain active until they are closed."
+Removes all hooks and deregisters every active session: stack entries are
+removed from @emacs_openfile_stack, filenotify watches are cancelled, and
+cmdfiles are deleted from disk."
   (interactive)
   (remove-hook 'server-after-make-frame-hook #'tmux-openfile--register-frame)
   (remove-hook 'delete-frame-functions #'tmux-openfile--deregister-frame)
-  (remove-hook 'kill-emacs-hook #'tmux-openfile--deregister-all))
+  (remove-hook 'kill-emacs-hook #'tmux-openfile--deregister-all)
+  (tmux-openfile--deregister-all))
 
 (provide 'tmux-openfile)
 
