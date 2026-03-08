@@ -64,33 +64,62 @@ __emacs-tmux-openfile.et() {
   fi
 
   local file=${1-}
-  if [[ -z $file ]]; then
-    if [[ $keep_focus -eq 1 ]]; then
-      __emacs-tmux-openfile._usage "$cmd" 2
-      return 2
-    fi
-    # Focus-only: jump to the Emacs pane without opening a file.
-    [[ -n $cmdfile ]] || {
-      printf '%s\n' "${cmd}: error: no Emacs session registered in this tmux window" >&2
-      printf '%s\n' "${cmd}: hint: load tmux-openfile.el and run M-x tmux-openfile-enable" >&2
-      return 1
-    }
-    local active_cmd
-    active_cmd=$(command tmux display-message -t "$paneid" -p '#{pane_current_command}' 2>/dev/null || true)
-    [[ $active_cmd == emacs* ]] || {
-      printf '%s\n' "${cmd}: error: pane $paneid is no longer running Emacs (found: ${active_cmd:-nothing})" >&2
-      printf '%s\n' "${cmd}: hint: run '${cmd} --list' to see all panes in this tmux window" >&2
-      return 1
-    }
-    command tmux select-pane -t "$paneid"
-    return 0
+  if [[ -z $file && $keep_focus -eq 1 ]]; then
+    __emacs-tmux-openfile._usage "$cmd" 2
+    return 2
   fi
+
+  # Resolve the active session, auto-cleaning any stale entries.
+  # A stale entry is one whose pane is no longer running Emacs (e.g. after a
+  # crash). Each stale entry is removed from @emacs_openfile_stack and the next
+  # leftmost entry is tried, so a surviving standby session is used immediately.
+  local pane_cmd stale cur_raw new_stack remaining entry
+  while [[ -n $cmdfile ]]; do
+    pane_cmd=$(command tmux display-message -t "$paneid" -p '#{pane_current_command}' 2>/dev/null || true)
+    [[ $pane_cmd == emacs* ]] && break
+    # Stale entry: remove it from the stack and try the next one.
+    stale=$cmdfile
+    cur_raw=$(command tmux show-options -w -qv @emacs_openfile_stack 2>/dev/null || true)
+    new_stack=''
+    remaining="$cur_raw"
+    while [[ -n $remaining ]]; do
+      if [[ $remaining == *$'\x1f'* ]]; then
+        entry="${remaining%%$'\x1f'*}"
+        remaining="${remaining#*$'\x1f'}"
+      else
+        entry="$remaining"
+        remaining=''
+      fi
+      [[ $entry == "$stale" ]] && continue
+      if [[ -n $new_stack ]]; then
+        new_stack+=$'\x1f'"$entry"
+      else
+        new_stack="$entry"
+      fi
+    done
+    if [[ -n $new_stack ]]; then
+      command tmux set-option -w @emacs_openfile_stack "$new_stack"
+      cmdfile="${new_stack%%$'\x1f'*}"
+      stem="${cmdfile##*/}"; stem="${stem%.cmd}"
+      paneid="${stem##*-}"
+    else
+      command tmux set-option -w -u @emacs_openfile_stack
+      cmdfile=''
+      paneid=''
+    fi
+  done
 
   [[ -n $cmdfile ]] || {
     printf '%s\n' "${cmd}: error: no Emacs session registered in this tmux window" >&2
     printf '%s\n' "${cmd}: hint: load tmux-openfile.el and run M-x tmux-openfile-enable" >&2
     return 1
   }
+
+  # Focus-only: jump to the Emacs pane without opening a file.
+  if [[ -z $file ]]; then
+    command tmux select-pane -t "$paneid"
+    return 0
+  fi
 
   # Security guard: symlink and ownership checks
   #
@@ -104,14 +133,6 @@ __emacs-tmux-openfile.et() {
   # a write to an arbitrary path owned by the user.
   [[ -f $cmdfile && ! -L $cmdfile && -O $cmdfile ]] || {
     printf '%s\n' "${cmd}: error: unsafe cmdfile: $cmdfile" >&2
-    return 1
-  }
-
-  local active_cmd
-  active_cmd=$(command tmux display-message -t "$paneid" -p '#{pane_current_command}' 2>/dev/null || true)
-  [[ $active_cmd == emacs* ]] || {
-    printf '%s\n' "${cmd}: error: pane $paneid is no longer running Emacs (found: ${active_cmd:-nothing})" >&2
-    printf '%s\n' "${cmd}: hint: run '${cmd} --list' to see all panes in this tmux window" >&2
     return 1
   }
 
