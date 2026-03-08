@@ -137,7 +137,14 @@ __emacs-tmux-tandem.et() {
   }
 
   # In-place update (no temp+rename) so Emacs file-notify watches keep working.
-  printf '%s' "$file" >| "$cmdfile"
+  # Expand to absolute path without resolving symlinks (pwd -L is the default;
+  # use pwd -P to resolve them).
+  local absfile
+  case "$file" in
+    /*) absfile="$file" ;;
+    *)  absfile="$(pwd)/$file" ;;
+  esac
+  printf '%s' "$absfile" >| "$cmdfile"
 
   # Move focus to the Emacs pane (unless --keep-focus was given).
   if [[ $keep_focus -eq 0 ]]; then
