@@ -82,6 +82,7 @@
 ;; Call `tmux-tandem-disable' to stop registering new frames.
 
 (require 'cl-lib)
+(require 'filenotify)
 
 (defgroup tmux-tandem nil
   "Open files in Emacs via tmux window metadata."
@@ -96,7 +97,8 @@
   :type '(repeat symbol))
 
 (defcustom tmux-tandem-stack-option "@emacs_openfile_stack"
-  "tmux window user option that stores the ordered session list (leftmost = active)."
+  "tmux window user option storing the ordered session list.
+Leftmost entry is the active session."
   :type 'string)
 
 ;; All three tables are keyed by pane-id (e.g. "%5"), which is unique per
@@ -155,7 +157,8 @@ The file and its parent directory are created with 0700/0600 permissions."
 
 (defun tmux-tandem--stack-read (win)
   "Return the session stack for tmux window WIN as a list of strings.
-Each entry is a cmdfile path; leftmost is the active session.  Returns nil if unset."
+Each entry is a cmdfile path; leftmost is the active session.
+Returns nil if unset."
   (let ((raw (tmux-tandem--tmux "show-options" "-w" "-qv" "-t" win
                                   tmux-tandem-stack-option)))
     (if (or (null raw) (string-empty-p (string-trim raw)))
@@ -173,7 +176,8 @@ Unsets the option if ENTRIES is empty."
                          tmux-tandem-stack-option)))
 
 (defun tmux-tandem--lookup-tty (tty)
-  "Return a cons (WINDOW-ID . PANE-ID) for the tmux pane whose tty equals TTY, or nil."
+  "Return a cons (WINDOW-ID . PANE-ID) for the tmux pane matching TTY.
+Matches the pane whose tty equals TTY; returns nil if none."
   (let* ((out (tmux-tandem--tmux "list-panes" "-a" "-F" "#{pane_tty}\t#{window_id}\t#{pane_id}"))
          (lines (and out (split-string out "\n" t))))
     (cl-loop for line in lines
@@ -264,7 +268,7 @@ when Emacs terminates without deleting individual frames first."
             (stack (tmux-tandem--stack-read win))
             (new-stack (cl-remove cmdfile stack :test #'string=)))
        (tmux-tandem--stack-write win new-stack)
-       (when-let ((watch (gethash pane tmux-tandem--pane->watch)))
+       (when-let* ((watch (gethash pane tmux-tandem--pane->watch)))
          (file-notify-rm-watch watch))
        (ignore-errors (delete-file cmdfile))))
    tmux-tandem--pane->session)
@@ -283,7 +287,7 @@ Called from `delete-frame-functions' when an Emacs frame is closed."
              (stack (tmux-tandem--stack-read win))
              (new-stack (cl-remove cmdfile stack :test #'string=)))
         (tmux-tandem--stack-write win new-stack)
-        (when-let ((watch (gethash pane tmux-tandem--pane->watch)))
+        (when-let* ((watch (gethash pane tmux-tandem--pane->watch)))
           (file-notify-rm-watch watch))
         (ignore-errors (delete-file cmdfile))
         (remhash pane tmux-tandem--pane->watch)
@@ -317,7 +321,6 @@ and installs hooks so that every subsequent tty frame is automatically
 registered and every closed frame is automatically deregistered."
   (interactive)
   (require 'server nil t)
-  (require 'filenotify nil t)
   (add-hook 'server-after-make-frame-hook #'tmux-tandem--register-frame)
   (add-hook 'delete-frame-functions #'tmux-tandem--deregister-frame)
   (add-hook 'kill-emacs-hook #'tmux-tandem--deregister-all)
